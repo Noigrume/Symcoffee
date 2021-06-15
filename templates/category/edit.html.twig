@@ -1,0 +1,16 @@
+{% extends"base.html.twig" %}
+
+{% block title %}
+    modifier {{ category.name }}
+{% endblock %}
+{% block body %}
+    <h1> modifier {{ category.name }}</h1>
+
+    {{ form_start(formView) }}
+    {{ form_widget(formView) }}
+
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> mettre à jour
+    </button>
+    {{ form_end(formView) }}
+{% endblock %}
