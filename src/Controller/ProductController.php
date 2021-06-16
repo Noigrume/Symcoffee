@@ -15,6 +15,7 @@ use App\Repository\ProductRepository;
 
 
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 class ProductController extends AbstractController
@@ -58,8 +59,10 @@ class ProductController extends AbstractController
     /**
      * @Route("/admin/product/{id}/edit", name="product_edit")
      */
-    public function edit($id, ProductRepository $productRepository, Request $request, EntityManagerInterface $em)
+    public function edit($id, ProductRepository $productRepository, Request $request, EntityManagerInterface $em, ValidatorInterface $validator)
     {
+
+
         $product = $productRepository->find($id);
 
         $form = $this->createForm(productType::class, $product);
@@ -67,7 +70,7 @@ class ProductController extends AbstractController
         //$form->setData($product);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             //getDatta optionnel, car le formulaire travail sur l'objet product
             //$product = $form->getData();
             $em->flush();
@@ -98,7 +101,7 @@ class ProductController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
 
             $product->setSlug(strtolower($slugger->slug($product->getName())));
             $em->persist($product);
