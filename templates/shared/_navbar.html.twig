@@ -25,6 +25,10 @@
                 </li>
                 {% if app.user %}
                     <li class="nav-item">
+                        <a href="{{ path('purchase_index') }}" class="btn btn-danger">Mes commandes</a>
+                    </li>
+
+                    <li class="nav-item">
                         <a href="{{ path('security_logout') }}" class="btn btn-danger">logout</a>
                     </li>
                 {% else %}

@@ -28,6 +28,12 @@ class CartService
         return $this->session->set('cart', $cart);
     }
 
+    //vider le panier
+    public function empty()
+    {
+        $this->saveCart([]);
+    }
+
     //Ajout d'un item au panier
     public function add(int $id)
     {

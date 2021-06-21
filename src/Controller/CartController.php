@@ -4,14 +4,11 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\ProductRepository;
 use App\Entity\Product;
 use App\Cart\CartService;
+use App\Form\CartConfirmationType;
 
 
 class CartController extends AbstractController
@@ -51,7 +48,7 @@ class CartController extends AbstractController
             return $this->redirectToRoute("cart_show");
         }
 
-        //Rediriger sur la fiche produit 
+        //Rediriger sur la fiche produit
         return $this->redirectToRoute('product_show', [
             'category_slug' => $product->getCategory()->getSlug(),
             'slug' => $product->getSlug()
@@ -65,6 +62,7 @@ class CartController extends AbstractController
      */
     public function show(CartService $cartService)
     {
+        $form = $this->createForm(CartConfirmationType::class);
         //récupération du panier
         $finalCart = $cartService->getCartitems();
 
@@ -74,7 +72,8 @@ class CartController extends AbstractController
         //Envoie des données au template
         return $this->render('cart/index.html.twig', [
             'cart' => $finalCart,
-            'total' => $total
+            'total' => $total,
+            'confirmationForm' => $form->createView()
         ]);
     }
 
