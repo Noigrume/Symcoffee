@@ -10,18 +10,20 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Cart\CartService;
 use App\Form\CartConfirmationType;
 use App\Entity\PurchaseItem;
+use App\Purchase\PurchaseRegister;
 
 class PurchaseConfirmationController extends AbstractController
 {
     protected $cartService;
     protected $em;
+    protected $register;
 
-    public function __construct(CartService $cartService, EntityManagerInterface $em)
+    public function __construct(CartService $cartService, EntityManagerInterface $em, PurchaseRegister $register)
     {
         $this->cartService = $cartService;
         $this->em = $em;
+        $this->register = $register;
     }
-
 
     /**
      * @Route("/purchase/confirm", name="purchase_confirm")
@@ -30,7 +32,6 @@ class PurchaseConfirmationController extends AbstractController
     public function confirm(Request $request)
     {
         // lire les données du formulaire
-        // formfactory interface + request
         $form = $this->createForm(CartConfirmationType::class);
         $form->handleRequest($request);
 
@@ -39,8 +40,6 @@ class PurchaseConfirmationController extends AbstractController
             $this->addFlash('warning', 'Veuillez remplir le formulaire avant confirmation');
             return $this->redirectToRoute('cart_show');
         }
-        // si je ne suis pas co on sort (security)
-        $user = $this->getUser();
 
         // s’il n’y a pas de produit dans le panier, je sors
         $cartItems = $this->cartService->getCartItems();
@@ -48,33 +47,16 @@ class PurchaseConfirmationController extends AbstractController
             $this->addFlash('warning', 'Vous ne pouvez pas confirmer un panier vide');
             return $this->redirectToRoute('cart_show');
         }
-        // sinon on crée une purchase
-        /** @var  $purchase */
+        // extrait la commande du formulaire
+        /** @var  $Purchase */
         $purchase = $form->getData();
-        // on li la purchase à l’utilisateur connecté
-        $purchase->setUser($user)
-            ->setPurchasedAt(new DateTime())
-            ->setTotal($this->cartService->getTotal());
 
-        $this->em->persist($purchase);
 
-        // on a lie avec les produits qui sont dans le panier( cart service)
-        foreach ($this->cartService->getCartItems() as $cartItem) {
-            $purchaseItem = new PurchaseItem;
-            $purchaseItem->setPurchase($purchase)
-                ->setProduct($cartItem->product)
-                ->setProductName($cartItem->product->getName())
-                ->setQuantity($cartItem->quantity)
-                ->setTotal($cartItem->getTotal())
-                ->setProductPrice($cartItem->product->getPrice());
-            $this->em->persist($purchaseItem);
-        }
+        //je demande à l'enregistrer
+        $this->register->storePurchase($purchase);
 
-        // enregistrer la commander (entityManager)
-        $this->em->flush();
-
-        $this->cartService->empty();
-        $this->addFlash('success', "La commande a été enregistrée avec succès");
-        return $this->redirectToRoute('purchase_index');
+        return $this->redirectToRoute('purchase_payment_form', [
+            'id' => $purchase->getId()
+        ]);
     }
 }
