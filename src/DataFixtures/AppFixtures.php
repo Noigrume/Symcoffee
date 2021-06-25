@@ -79,7 +79,6 @@ class AppFixtures extends Fixture
 
                 $manager->persist($product);
             }
-
         }
 
         //crée les commandes
@@ -90,7 +89,7 @@ class AppFixtures extends Fixture
                 ->setPostalCode($faker->postcode)
                 ->setCity($faker->city)
                 ->setPurchasedAt($faker->dateTimeBetween('-6 months'))
-                ->setTotalPrice(mt_rand(2000, 300000))
+                ->setTotal(mt_rand(2000, 300000))
                 ->setUser($faker->randomElement($users));
 
 
